@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Revision Flashcards</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-brain"></i>
+            <span>Revision Flashcards</span>
+        </div>
+        <div class="nav-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="leaderboard.html" class="active"><i class="fas fa-trophy"></i> Leaderboard</a>
+            <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+        </div>
+        <div class="nav-user">
+            <span id="user-display">Welcome, <span id="username-display">User</span></span>
+            <button id="logout-btn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+
+    <div class="container leaderboard-container">
+        <div class="leaderboard-header">
+            <h1>Leaderboard</h1>
+            <p>Top performers across all categories</p>
+        </div>
+
+        <div class="leaderboard-filters">
+            <div class="filter-group">
+                <label for="category-filter">Category:</label>
+                <select id="category-filter">
+                    <option value="all">All Categories</option>
+                    <option value="general">General Knowledge</option>
+                    <option value="science">Science</option>
+                    <option value="history">History</option>
+                    <option value="geography">Geography</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="time-filter">Time Period:</label>
+                <select id="time-filter">
+                    <option value="all-time">All Time</option>
+                    <option value="this-month">This Month</option>
+                    <option value="this-week">This Week</option>
+                    <option value="today">Today</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="leaderboard-top">
+            <div class="top-user second-place">
+                <div class="rank">2</div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <h3>User2</h3>
+                    <p>Score: 85%</p>
+                </div>
+            </div>
+            <div class="top-user first-place">
+                <div class="rank">1</div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <h3>User1</h3>
+                    <p>Score: 92%</p>
+                </div>
+            </div>
+            <div class="top-user third-place">
+                <div class="rank">3</div>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <h3>User3</h3>
+                    <p>Score: 78%</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>Category</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Leaderboard entries will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button class="btn btn-outline" id="prev-page">Previous</button>
+            <span id="page-info">Page 1 of 5</span>
+            <button class="btn btn-outline" id="next-page">Next</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2023 Revision Flashcards. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="leaderboard.js"></script>
+</body>
+</html> 
