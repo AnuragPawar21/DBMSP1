@@ -13,20 +13,30 @@
     <nav class="navbar">
         <div class="nav-brand">
             <i class="fas fa-brain"></i>
-            <span>Revision Flashcards</span>
-        </div>
-        <div class="nav-menu">
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
-            <a href="leaderboard.html"><i class="fas fa-trophy"></i> Leaderboard</a>
-            <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
-        </div>
-        <div class="nav-user">
-            <span id="user-display">Welcome, <span id="username-display">User</span></span>
-            <button id="logout-btn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        </div>
+              <span>Revision Flashcards</span>
+          </div>
+          <label class="main">
+            Menu
+            <input class="inp" type="checkbox" />
+            <div class="bar">
+              <span class="top bar-list"></span>
+              <span class="middle bar-list"></span>
+              <span class="bottom bar-list"></span>
+            </div>
+          
+            <section class="menu-container">
+              <a href="index.html" class="menu-list">🏠 Home</a>
+              <a href="dashboard.html" class="menu-list">📊 Dashboard</a>
+              <a href="leaderboard.html" class="menu-list">🏆 Leaderboard</a>
+              <a href="profile.html" class="menu-list">👤 Profile</a>
+              <a href="dbms.html" class="menu-list">🧠 DBMS Test</a>
+              <a href="data-analysis.html" class="menu-list">📈 DA Test</a>
+              <a href="java.html" class="menu-list">☕ Java Test</a>
+              <a href="probability.html" class="menu-list">🎲 Probability Test</a>
+              <div id="logout-btn" class="menu-list text-red-500">🔓 Logout</div>
+            </section>
+          </label>
     </nav>
-
     <div class="container dashboard-container">
         <div class="dashboard-header">
             <h1>Your Learning Dashboard</h1>

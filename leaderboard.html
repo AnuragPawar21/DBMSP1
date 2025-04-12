@@ -12,20 +12,26 @@
     <nav class="navbar">
         <div class="nav-brand">
             <i class="fas fa-brain"></i>
-            <span>Revision Flashcards</span>
-        </div>
-        <div class="nav-menu">
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-            <a href="leaderboard.html" class="active"><i class="fas fa-trophy"></i> Leaderboard</a>
-            <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
-        </div>
-        <div class="nav-user">
-            <span id="user-display">Welcome, <span id="username-display">User</span></span>
-            <button id="logout-btn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        </div>
+              <span>Revision Flashcards</span>
+          </div>
+          <label class="main">
+            Menu
+            <input class="inp" type="checkbox" />
+          
+            <div class="bar">
+              <span class="top bar-list"></span>
+              <span class="middle bar-list"></span>
+              <span class="bottom bar-list"></span>
+            </div>
+          
+            <section class="menu-container">
+              <a href="dashboard.html" class="menu-list">Dashboard</a>
+              <a href="profile.html" class="menu-list">Profile</a>
+              <a href="leaderboard.html" class="menu-list">Leaderboard</a>
+              <div class="menu-list text-red-500" id="logout-btn">Logout</div>
+            </section>
+          </label>    
     </nav>
-
     <div class="container leaderboard-container">
         <div class="leaderboard-header">
             <h1>Leaderboard</h1>
