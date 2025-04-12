@@ -6,14 +6,15 @@
     <title>Revision Flashcards</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <canvas id="wave-bg"></canvas>
     <nav class="navbar">
         <div class="nav-brand">
             <i class="fas fa-brain"></i>
-            <span>Revision Flashcards</span>
-        </div>
+              <span>Revision Flashcards</span>
+          </div>
         <div class="nav-menu">
             <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
             <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
@@ -28,7 +29,11 @@
 
     <div class="container">
         <div class="welcome-banner">
-            <h1>Welcome to Revision Flashcards</h1>
+          <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-center 
+           bg-gradient-to-r from-blue-400 via-pink-400 to-purple-500 
+           text-transparent bg-clip-text drop-shadow-2xl mb-6 transition-all duration-500 hover:scale-105">
+            Welcome to Revision Flashcards
+          </h1>
             <p>Test your knowledge with our interactive flashcards</p>
         </div>
         <div class="category-selector">
@@ -38,7 +43,7 @@
                 </span>
             </button>             
             <div class="categories">
-              <div class="card category-card" data-category="DBMS" data-bg="DBMS.jpg">
+              <a href="dbms.html" class="card category-card" data-bg="DBMS.jpg">
                 <span></span>
                 <div class="content">
                   <div>
@@ -46,8 +51,8 @@
                     <h3>DBMS</h3>
                   </div>
                 </div>
-              </div>
-              <div class="card category-card" data-category="Data Analysis" data-bg="DataAnalysis.jpg">
+              </a>
+              <a href="data-analysis.html" class="card category-card" data-bg="DataAnalysis.jpg">
                 <span></span>
                 <div class="content">
                   <div>
@@ -55,8 +60,8 @@
                     <h3>Data Analysis</h3>
                   </div>
                 </div>
-              </div>
-              <div class="card category-card" data-category="Probability" data-bg="Probablity.jpg">
+              </a>
+              <a href="probablity.html" class="card category-card" data-bg="Probablity.jpg">
                 <span></span>
                 <div class="content">
                   <div>
@@ -64,8 +69,8 @@
                     <h3>Probability</h3>
                   </div>
                 </div>
-              </div>
-              <div class="card category-card" data-category="Java" data-bg="Java.jpg">
+              </a>
+              <a href="java.html" class="card category-card" data-bg="Java.jpg">
                 <span></span>
                 <div class="content">
                   <div>
@@ -73,7 +78,8 @@
                     <h3>Java</h3>
                   </div>
                 </div>
-              </div>
+              </a>
+            </div>            
             </div>
           </div>
           

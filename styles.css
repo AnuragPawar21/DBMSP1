@@ -75,6 +75,7 @@ h2 {
 
 h3 {
     font-size: 1.75rem;
+    text-decoration: none;
 }
 
 p {
@@ -108,6 +109,7 @@ a:hover {
     border-radius: var(--border-radius);
     transition: var(--transition);
     cursor: pointer;
+    text-decoration: none;
 }
 
 .btn-primary {
@@ -343,11 +345,13 @@ a:hover {
     overflow: hidden;
     background-size: cover;
     background-position: center;
+    text-decoration: none;
   }
   
   .card:hover {
     transform: translateY(-20px);
     box-shadow: 0 15px 30px rgba(74, 108, 247, 0.3); /* Soft blue shadow */
+    text-decoration: none   ;
   }
   
   .card::before {
