@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz</title>
+  <link rel="stylesheet" href="quiz.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    // Declare before anything else
+    window.isMuted = false;
+  </script>
+</head>
+<body>
+  <div class="quiz-container">
+    <button id="mute-btn" class="mute-button">🔊</button>
+
+    <h1 id="quiz-title">Loading Quiz...</h1>
+    <div id="quiz-box">
+      <div id="question-box"></div>
+      <div id="options-box"></div>
+      <div id="timer">Time Left: <span id="time">30</span>s</div>
+    </div>
+  </div>
+
+  <script>
+    const muteBtn = document.getElementById("mute-btn");
+
+    muteBtn.addEventListener("click", () => {
+      window.isMuted = !window.isMuted;
+      muteBtn.textContent = window.isMuted ? "🔇" : "🔊";
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const chapter = params.get("chapter");
+
+    if (chapter) {
+      const formattedTitle = chapter.replace(/-/g, " ").toUpperCase() + " Quiz";
+      document.title = formattedTitle;
+      document.getElementById("quiz-title").innerText = formattedTitle;
+
+      const script = document.createElement("script");
+      script.src = `${chapter}.js`;
+      script.onload = () => {
+        console.log(`${chapter}.js loaded successfully`);
+      };
+      script.onerror = () => {
+        document.getElementById("quiz-box").innerHTML = `
+          <p>⚠️ Could not load <code>${chapter}.js</code>. File not found or contains an error.</p>
+        `;
+      };
+      document.body.appendChild(script);
+    } else {
+      document.getElementById("quiz-title").innerText = "Quiz Not Found";
+      document.getElementById("quiz-box").innerHTML = `
+        <p>❌ Please specify a chapter like <code>?chapter=db-ch1</code> in the URL.</p>
+      `;
+    }
+  </script>
+</body>
+</html>
