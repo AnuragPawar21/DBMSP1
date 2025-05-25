@@ -1,46 +1,40 @@
+import { supabase } from './supabaseClient.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     
-    // Check if user is already logged in
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-        window.location.href = 'index.html';
-    }
+    // Check if user is already logged in via Supabase
+    (async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            // User is logged in, redirect to index.html
+            window.location.href = 'index.html';
+        }
+        // If no session, the login page will remain, allowing the user to log in.
+    })();
     
     // Handle login form submission
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value; // Changed variable name and ID
         const password = document.getElementById('password').value;
-        const remember = document.getElementById('remember').checked;
         
-        // Get users from localStorage
-        const users = JSON.parse(localStorage.getItem('users')) || {};
-        
-        // Check if user exists and password is correct
-        if (users[username] && users[username].password === password) {
-            // Store current user in localStorage
-            const userData = {
-                username: username,
-                fullname: users[username].fullname,
-                email: users[username].email,
-                joined: users[username].joined
-            };
-            
-            localStorage.setItem('currentUser', JSON.stringify(userData));
-            
-            // If remember me is checked, store login state
-            if (remember) {
-                localStorage.setItem('rememberMe', 'true');
+        (async () => {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email, // Use the new 'email' variable
+                password: password
+            });
+
+            if (error) {
+                showError(error.message);
+            } else {
+                // Login successful, redirect to home page
+                // Supabase handles session storage automatically.
+                window.location.href = 'index.html';
+                // No need to set currentUser or rememberMe in localStorage manually
             }
-            
-            // Redirect to home page
-            window.location.href = 'index.html';
-        } else {
-            // Show error message
-            showError('Invalid username or password');
-        }
+        })();
     });
     
     // Show error message
@@ -72,4 +66,4 @@ document.addEventListener('DOMContentLoaded', () => {
             errorElement.remove();
         }, 3000);
     }
-}); 
+});

@@ -1,17 +1,7 @@
 // supabaseClient.js
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'; // Using ES Module import
 
-// IMPORTANT: Replace with your actual Supabase URL and Anon Key
-const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace this
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace this
+const supabaseUrl = 'https://dqvltutvyytoaqwikwxy.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxdmx0dXR2eXl0b2Fxd2lrd3h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNTQ5OTYsImV4cCI6MjA2MzczMDk5Nn0.vPT83mAeO2IDQSwfCZPUP5aFBpKXTQeArSpbfxzPhW0';
 
-if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-    console.warn('Supabase URL or Anon Key is not configured. Please update supabaseClient.js');
-    // Optionally, you could throw an error to make it more obvious during development
-    // throw new Error('Supabase client is not configured. Update supabaseClient.js with your project URL and Anon Key.');
-}
-
-const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// You can export the client for use in other scripts
-// For simple script tag inclusion, it will be available globally as `supabase`
-// or you can do: window.supabaseClient = supabase; if needed.
+export const supabase = createClient(supabaseUrl, supabaseKey);

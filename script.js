@@ -1,58 +1,65 @@
-// Ensure Supabase client is available
-// This check should be at the very top, or supabase should be checked before use in each function.
-// For simplicity, functions will check if supabase is defined.
-
+import { supabase } from './supabaseClient.js';
+console.log('script.js: supabase client on load:', supabase);
 // Check if user is logged in
 async function checkAuth() {
-    if (typeof supabase === 'undefined') {
-        console.error('Supabase client not available for checkAuth.');
-        // If Supabase isn't loaded, can't check auth state, might default to redirecting
-        // or showing an error. For now, let's assume if Supabase isn't there, something is wrong.
-        if (!window.location.href.includes('login.html') && !window.location.href.includes('signup.html')) {
-            // window.location.href = 'login.html'; // Uncomment if redirection is desired on Supabase load failure
-        }
-        return false;
-    }
-
-    const { data: { session }, error } = await supabase.auth.getSession();
-
-    if (error) {
-        console.error("Error getting session for checkAuth:", error);
-        return false; // Or handle error appropriately
-    }
-
+    console.log('script.js: supabase client in checkAuth:', supabase);
+    const { data: { session } } = await supabase.auth.getSession();
     if (!session && !window.location.href.includes('login.html') && !window.location.href.includes('signup.html')) {
-        console.log("No session found, redirecting to login.");
         window.location.href = 'login.html';
         return false;
     }
-    // If there's a session, or if we are on login/signup page, this function returns true or doesn't redirect.
-    return true; 
+    return true;
 }
 
-// Display user information in the navbar (if applicable)
+// Display user information in the navbar and profile page
 async function displayUserInfo() {
-    if (typeof supabase === 'undefined') {
-        console.warn('Supabase not available for displayUserInfo.');
-        return;
-    }
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            let displayName = user.email; // Default to email
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    const usernameDisplay = document.getElementById('username-display'); // Assuming this element exists in your navbar HTML
+            // Try to get full_name from profiles table
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('full_name, username')
+                .eq('id', user.id)
+                .single();
 
-    if (authError) {
-        console.error("Error fetching user for displayUserInfo:", authError);
-        if(usernameDisplay) usernameDisplay.textContent = 'Guest';
-        return;
-    }
+            if (profileError && profileError.code !== 'PGRST116') { // PGRST116: 'single' row not found, which is okay
+                console.error('Error fetching profile:', profileError);
+            } else if (profile) {
+                if (profile.full_name) {
+                    displayName = profile.full_name;
+                } else if (profile.username) {
+                    displayName = profile.username; // Fallback to username if full_name is not set
+                }
+            }
+            
+            const usernameDisplayElement = document.getElementById('username-display');
+            if (usernameDisplayElement) {
+                usernameDisplayElement.textContent = displayName;
+            } else {
+                // console.log('username-display element not found. User info not displayed in navbar.');
+            }
+            
+            // Update profile page specific elements if on profile.html
+            if (window.location.pathname.includes('profile.html')) {
+                document.getElementById('profile-name').textContent = profile ? (profile.full_name || user.email) : user.email;
+                document.getElementById('profile-username').textContent = profile && profile.username ? `@${profile.username}` : 'N/A';
+                document.getElementById('profile-email').textContent = user.email;
 
-    if (user && usernameDisplay) {
-        // Use email as a fallback if username is not directly on auth.user metadata
-        // Or fetch from your 'users' table if you stored a specific display username there
-        const display = user.user_metadata?.username || user.email; 
-        usernameDisplay.textContent = display;
-    } else if (usernameDisplay) {
-        usernameDisplay.textContent = 'Guest';
+                document.getElementById('fullname-value').textContent = profile ? (profile.full_name || 'N/A') : 'N/A';
+                document.getElementById('email-value').textContent = user.email;
+                document.getElementById('username-value').textContent = profile ? (profile.username || 'N/A') : 'N/A';
+                // For 'joined-value', Supabase auth user 'created_at' is available, not directly from profile table unless synced.
+                // For simplicity, let's use user.created_at from Supabase auth.
+                const joinedDate = new Date(user.created_at);
+                document.getElementById('joined-value').textContent = joinedDate.toLocaleDateString();
+            }
+
+        }
+    } catch (error) {
+        console.error('Exception in displayUserInfo:', error);
     }
 }
 
@@ -60,35 +67,14 @@ async function displayUserInfo() {
 function setupLogout() {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        // Check if event listener is already attached to avoid duplicates,
-        // especially if this script is loaded on pages that also have their own logout handlers.
-        // A simple way: give it a flag or remove previous before adding.
-        // For now, let's assume it's fine, but this can be an issue with multiple scripts.
         logoutBtn.addEventListener('click', async () => {
-            if (typeof supabase === 'undefined') {
-                alert('Supabase is not available. Cannot log out.');
-                return;
-            }
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    console.error('Error during sign out:', error);
-                    alert('Logout failed: ' + error.message);
-                } else {
-                    window.location.href = 'login.html'; // Redirect to login page
-                }
-            } catch (e) {
-                console.error('Exception during sign out:', e);
-                alert('An unexpected error occurred during logout.');
-            }
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
         });
     }
 }
 
-// --- EXISTING QUIZ LOGIC AND OTHER FUNCTIONS BELOW ---
-// (Keep all other functions like questionsByCategory, initQuiz, showQuestion, etc., as they are.
-// You are manually updating their Supabase integration for quiz results.)
-
+// Sample questions database by category
 const questionsByCategory = {
     general: [
         {
@@ -200,17 +186,16 @@ const questionsByCategory = {
     ]
 };
 
-
 let currentQuestions = [];
 let currentQuestionIndex = 0;
-let score = 0; 
+let score = 0;
 let canAnswer = true;
 let selectedCategory = '';
 
 // DOM Elements
 const questionElement = document.getElementById('question');
 const optionsElement = document.getElementById('options');
-const scoreElement = document.getElementById('score'); 
+const scoreElement = document.getElementById('score');
 const nextButton = document.getElementById('next-btn');
 const restartButton = document.getElementById('restart-btn');
 const finalScoreElement = document.getElementById('final-score');
@@ -227,19 +212,15 @@ const categorySelector = document.querySelector('.category-selector');
 // Initialize the quiz
 function initQuiz() {
     currentQuestionIndex = 0;
-    // score = 0; // Reset score for the general quiz. This `score` variable is global.
+    score = 0;
     if (scoreElement) {
-        scoreElement.textContent = score; 
+        scoreElement.textContent = score;
     }
     showQuestion();
 }
 
 // Display current question and options
 function showQuestion() {
-    if (!questionElement || !optionsElement || !currentQuestions[currentQuestionIndex]) {
-        // console.error("Required elements for showQuestion are missing or data is not ready.");
-        return;
-    }
     const currentQuestion = currentQuestions[currentQuestionIndex];
     questionElement.textContent = currentQuestion.question;
     
@@ -253,7 +234,7 @@ function showQuestion() {
     });
 
     canAnswer = true;
-    if(nextButton) nextButton.disabled = true;
+    nextButton.disabled = true;
 }
 
 // Handle option selection
@@ -270,18 +251,16 @@ function selectOption(index) {
 
     if (index === currentQuestion.correctAnswer) {
         options[index].classList.add('correct');
-        score++; 
+        score++;
         if (scoreElement) {
             scoreElement.textContent = score;
         }
     } else {
         options[index].classList.add('wrong');
-        if (options[currentQuestion.correctAnswer]) { 
-            options[currentQuestion.correctAnswer].classList.add('correct');
-        }
+        options[currentQuestion.correctAnswer].classList.add('correct');
     }
 
-    if(nextButton) nextButton.disabled = false;
+    nextButton.disabled = false;
 }
 
 // Move to next question
@@ -294,34 +273,45 @@ function nextQuestion() {
     }
 }
 
-// Show final results for general quiz
-async function showResults() { // Made async as saveScore will be async
-    if (flashcardContainer) flashcardContainer.style.display = 'none';
-    if (controlsContainer) controlsContainer.style.display = 'none';
-    if (resultsContainer) resultsContainer.style.display = 'block';
+// Show final results
+async function showResults() { // Made showResults async to await saveScore
+    flashcardContainer.style.display = 'none';
+    controlsContainer.style.display = 'none';
+    resultsContainer.style.display = 'block';
     
-    if (finalScoreElement) finalScoreElement.textContent = score; 
-    if (totalQuestionsElement) totalQuestionsElement.textContent = currentQuestions.length;
+    finalScoreElement.textContent = score;
+    totalQuestionsElement.textContent = currentQuestions.length;
     
-    if (typeof saveScore === "function") {
-        let userId = null;
-        if (typeof supabase !== 'undefined') {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) userId = user.id;
-        }
-        if (userId) {
-            // Assuming saveScore is now: async saveScore(userId, category, scoreValue, totalQuestions)
-            await saveScore(userId, selectedCategory, score, currentQuestions.length);
-        } else {
-            console.warn("User not logged in, score not saved for general quiz.");
-            // Optionally alert the user that their score for the general quiz won't be saved
-        }
-    }
+    await saveScore(); // Await the saveScore operation
 }
 
-// Placeholder for the new saveScore you are adding manually:
-// async function saveScore(userId, category, scoreValue, totalQuestions) { /* ... your Supabase logic ... */ }
-// The old localStorage saveScore() function is removed.
+// Save score to user's history
+async function saveScore() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const scoreData = {
+                user_id: user.id,
+                category: selectedCategory, // Assuming selectedCategory is globally available
+                score: score,             // Assuming score is globally available
+                total_questions: currentQuestions.length // Assuming currentQuestions is globally available
+            };
+
+            const { error } = await supabase.from('scores').insert([scoreData]);
+            if (error) {
+                console.error('Error saving score:', error);
+                // Optionally, inform the user via an alert or UI message
+            } else {
+                console.log('Score saved successfully!');
+                // Optionally, confirm to the user via UI
+            }
+        } else {
+            console.log('User not logged in. Score not saved.');
+        }
+    } catch (error) {
+        console.error('Exception in saveScore:', error);
+    }
+}
 
 // View answers
 function viewAnswers() {
@@ -330,31 +320,31 @@ function viewAnswers() {
 
 // Try again
 function tryAgain() {
-    if(resultsContainer) resultsContainer.style.display = 'none';
-    if(flashcardContainer) flashcardContainer.style.display = 'block';
-    if(controlsContainer) controlsContainer.style.display = 'flex';
-    initQuiz(); 
+    resultsContainer.style.display = 'none';
+    flashcardContainer.style.display = 'block';
+    controlsContainer.style.display = 'flex';
+    initQuiz();
 }
 
 // Back to categories
 function backToCategories() {
-    if(resultsContainer) resultsContainer.style.display = 'none';
-    if(flashcardContainer) flashcardContainer.style.display = 'none';
-    if(controlsContainer) controlsContainer.style.display = 'none';
-    if(categorySelector) categorySelector.style.display = 'block';
+    resultsContainer.style.display = 'none';
+    flashcardContainer.style.display = 'none';
+    controlsContainer.style.display = 'none';
+    categorySelector.style.display = 'block';
 }
 
 // Start quiz for selected category
 function startCategoryQuiz(category) {
     selectedCategory = category;
-    currentQuestions = [...(questionsByCategory[category] || [])]; 
+    // Ensure questionsByCategory has the full structure
+    currentQuestions = questionsByCategory[category] ? [...questionsByCategory[category]] : [];
     shuffleArray(currentQuestions);
     
-    if(categorySelector) categorySelector.style.display = 'none';
-    if(flashcardContainer) flashcardContainer.style.display = 'block';
-    if(controlsContainer) controlsContainer.style.display = 'flex';
+    categorySelector.style.display = 'none';
+    flashcardContainer.style.display = 'block';
+    controlsContainer.style.display = 'flex';
     
-    score = 0; // Reset score for the new category quiz
     initQuiz();
 }
 
@@ -372,42 +362,47 @@ function setupEventListeners() {
     if (nextButton) {
         nextButton.addEventListener('click', nextQuestion);
     }
+    
     if (restartButton) {
         restartButton.addEventListener('click', () => {
-            if(nextButton) nextButton.style.display = 'block';
-            if(restartButton) restartButton.style.display = 'none';
+            nextButton.style.display = 'block';
+            restartButton.style.display = 'none';
             initQuiz();
         });
     }
+    
     if (viewAnswersButton) {
         viewAnswersButton.addEventListener('click', viewAnswers);
     }
+    
     if (tryAgainButton) {
         tryAgainButton.addEventListener('click', tryAgain);
     }
+    
     if (backToCategoriesButton) {
         backToCategoriesButton.addEventListener('click', backToCategories);
     }
+    
     if (categoryCards) {
         categoryCards.forEach(card => {
             card.addEventListener('click', () => {
                 const category = card.getAttribute('data-category');
-                if (questionsByCategory[category]) { 
-                    startCategoryQuiz(category);
-                } else {
-                    console.warn(`Category ${category} not found for quiz.`);
-                }
+                startCategoryQuiz(category);
             });
         });
     }
 }
 
 // Initialize the application
-async function init() { // Made init async because checkAuth is async
-    await checkAuth(); 
-    await displayUserInfo(); 
-    setupLogout(); 
-    setupEventListeners(); 
+async function init() {
+    if (await checkAuth()) {
+        await displayUserInfo();
+        setupLogout();
+        if (categorySelector || flashcardContainer) {
+             setupEventListeners();
+        }
+    }
 }
 
+// Start the application
 document.addEventListener('DOMContentLoaded', init);
