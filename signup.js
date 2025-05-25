@@ -1,13 +1,17 @@
+import { supabase } from './supabaseClient.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signup-form');
+
+    // Check if user is already logged in via Supabase
+    (async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            // User is logged in, redirect to index.html
+            window.location.href = 'index.html';
+        }
+    })();
     
-    // Check if user is already logged in
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-        window.location.href = 'index.html';
-    }
-    
-    // Handle signup form submission
     signupForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -22,34 +26,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // Get existing users from localStorage
-        const users = JSON.parse(localStorage.getItem('users')) || {};
-        
-        // Check if username already exists
-        if (users[username]) {
-            showError('Username already exists');
-            return;
-        }
-        
-        // Create new user
-        users[username] = {
-            password: password,
-            fullname: fullname,
-            email: email,
-            joined: new Date().toISOString(),
-            scores: []
-        };
-        
-        // Save users to localStorage
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        // Show success message
-        showSuccess('Account created successfully! Redirecting to login...');
-        
-        // Redirect to login page after 2 seconds
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 2000);
+        (async () => {
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        full_name: fullname,
+                        username: username
+                    }
+                }
+            });
+
+            if (error) {
+                showError(error.message);
+            } else {
+                showSuccess('Account created successfully! Redirecting to the main page...');
+                setTimeout(() => {
+                    window.location.href = 'index.html'; 
+                }, 2000);
+            }
+        })();
     });
     
     // Validate form
@@ -130,4 +127,4 @@ document.addEventListener('DOMContentLoaded', () => {
         successElement.style.marginBottom = '15px';
         successElement.style.textAlign = 'center';
     }
-}); 
+});
