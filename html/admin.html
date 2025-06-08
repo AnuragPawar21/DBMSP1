@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | Subjects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease-in-out infinite;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        /* Animated background circles */
+        
+        .bg-anim-circle {
+            position: absolute;
+            border-radius: 9999px;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .bg-anim-blue {
+            top: -60px;
+            left: -60px;
+            width: 320px;
+            height: 320px;
+            background: #c7d2fe;
+            opacity: 0.25;
+            animation: pulse-slow 3.5s ease-in-out infinite;
+        }
+        
+        .bg-anim-yellow {
+            bottom: -80px;
+            right: -80px;
+            width: 400px;
+            height: 400px;
+            background: #fef9c3;
+            opacity: 0.18;
+            animation: pulse-slow 3.5s 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-slow {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.25;
+            }
+            50% {
+                transform: scale(1.12);
+                opacity: 0.4;
+            }
+        }
+        /* Card and form enhancements */
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            border: 1.5px solid rgba(30, 64, 175, 0.12);
+            transition: box-shadow 0.3s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            margin-bottom: 2.5rem;
+            animation: fade-in-up 0.7s cubic-bezier(.25, 1.7, .45, .87);
+        }
+        
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .admin-card h2 {
+            color: #2563eb;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-btn {
+            background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 1rem;
+            padding: 0.6em 2em;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.10);
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .admin-btn:hover,
+        .admin-btn:focus {
+            background: linear-gradient(90deg, #1e40af 0%, #38bdf8 100%);
+            transform: translateY(-2px) scale(1.04);
+        }
+        
+        .admin-input,
+        .admin-select {
+            border-radius: 0.75rem;
+            border: 1.5px solid #c7d2fe;
+            padding: 0.7em 1.2em;
+            font-size: 1rem;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        
+        .admin-input:focus,
+        .admin-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px #60a5fa44;
+            outline: none;
+        }
+        
+        .admin-list li {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            margin-bottom: 0.7rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fade-in-up 0.7s cubic-bezier(.25, 1.7, .45, .87);
+        }
+        
+        .admin-list li span {
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .admin-list button {
+            margin-left: 0.5rem;
+        }
+        
+        .admin-list .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .admin-list .text-red-600 {
+            color: #ef4444;
+        }
+        /* Responsive tweaks */
+        
+        @media (max-width: 700px) {
+            .admin-card {
+                padding: 1.2rem !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-6 font-sans flex items-center justify-center">
+    <div class="bg-anim-circle bg-anim-blue"></div>
+    <div class="bg-anim-circle bg-anim-yellow"></div>
+
+    <div class="w-full max-w-3xl mx-auto flex flex-col items-center justify-center gap-8 p-6">
+        <header class="text-center mb-8 w-full">
+            <h1 class="text-3xl font-bold text-blue-700">Admin Panel: Manage Revision Flashcard</h1>
+        </header>
+
+        <div class="w-full admin-card p-6">
+            <h2 class="text-xl font-semibold mb-4">Subjects</h2>
+            <form id="addSubjectForm" class="flex mb-4 gap-2">
+                <input id="subjectName" type="text" placeholder="New Subject Name" class="flex-1 admin-input" required />
+                <button type="submit" class="admin-btn">Add</button>
+            </form>
+            <ul id="subjectList" class="admin-list"></ul>
+        </div>
+        <div class="w-full admin-card p-6">
+            <h2 class="text-xl font-semibold mb-4">Manage Chapters</h2>
+            <form id="addChapterForm" class="flex mb-4 gap-2">
+                <select id="chapterSubject" class="flex-1 admin-select">
+                    <option value="">Select Subject</option>
+                </select>
+                <input id="chapterNumber" type="number" min="1" placeholder="Chapter #" class="w-24 admin-input" required />
+                <input id="chapterTitle" type="text" placeholder="Chapter Title" class="flex-1 admin-input" required />
+                <button type="submit" class="admin-btn">Add</button>
+            </form>
+            <ul id="chapterList" class="admin-list"></ul>
+        </div>
+        <div class="w-full admin-card p-6">
+            <h2 class="text-xl font-semibold mb-4">Manage Questions</h2>
+            <form id="addFlashcardForm" class="space-y-4">
+                <select id="flashcardSubject" class="w-full admin-select">
+                    <option value="">Select Subject</option>
+                </select>
+                <select id="flashcardChapter" class="w-full admin-select mt-2">
+                    <option value="">Select Chapter</option>
+                </select>
+                <input id="questionText" type="text" placeholder="Question" class="w-full admin-input" required />
+                <input id="answerText" type="text" placeholder="Answer" class="w-full admin-input" required />
+                <button type="submit" class="admin-btn bg-green-600 hover:bg-green-700">Add Flashcard</button>
+            </form>
+            <ul id="flashcardList" class="mt-6 admin-list"></ul>
+        </div>
+        <div class="w-full admin-card p-6">
+            <h2 class="text-xl font-semibold mb-4">Upload Notes PDF</h2>
+            <form id="uploadNotesForm" class="flex flex-col gap-2 mb-4" enctype="multipart/form-data">
+                <select id="notesSubject" class="admin-select" required>
+                    <option value="">Select Subject</option>
+                </select>
+                <select id="notesChapter" class="admin-select" required>
+                    <option value="">Select Chapter</option>
+                </select>
+                <input type="file" id="notesPdf" accept="application/pdf" class="admin-input" required />
+                <button type="submit" class="admin-btn bg-pink-500 hover:bg-pink-600">Upload PDF</button>
+            </form>
+            <div id="notesUploadMsg" class="text-sm mt-2"></div>
+        </div>
+    </div>
+
+    <script>
+        const subjectList = document.getElementById('subjectList');
+        const subjectForm = document.getElementById('addSubjectForm');
+        const subjectInput = document.getElementById('subjectName');
+        const flashcardSubject = document.getElementById('flashcardSubject');
+        const flashcardChapter = document.getElementById('flashcardChapter');
+        const flashcardList = document.getElementById('flashcardList');
+        const addFlashcardForm = document.getElementById('addFlashcardForm');
+        const questionInput = document.getElementById('questionText');
+        const answerInput = document.getElementById('answerText');
+        const chapterSubject = document.getElementById('chapterSubject');
+        const addChapterForm = document.getElementById('addChapterForm');
+        const chapterNumberInput = document.getElementById('chapterNumber');
+        const chapterTitleInput = document.getElementById('chapterTitle');
+        const chapterList = document.getElementById('chapterList');
+        // --- Notes PDF Upload Logic ---
+        const uploadNotesForm = document.getElementById('uploadNotesForm');
+        const notesSubject = document.getElementById('notesSubject');
+        const notesChapter = document.getElementById('notesChapter');
+        const notesPdf = document.getElementById('notesPdf');
+        const notesUploadMsg = document.getElementById('notesUploadMsg');
+
+        async function loadSubjects() {
+            const res = await fetch('http://localhost:5000/api/admin/subjects');
+            const subjects = await res.json();
+            subjectList.innerHTML = '';
+            flashcardSubject.innerHTML = '<option value="">Select Subject</option>';
+            flashcardChapter.innerHTML = '<option value="">Select Chapter</option>';
+            chapterSubject.innerHTML = '<option value="">Select Subject</option>';
+            notesSubject.innerHTML = '<option value="">Select Subject</option>';
+            subjects.forEach(sub => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-gray-200 px-4 py-2 rounded';
+                li.innerHTML = `
+          <span class="font-medium">${sub.name}</span>
+          <div>
+            <button onclick="editSubject(${sub.id}, '${sub.name}')" class="text-blue-600 font-semibold mr-3">Edit</button>
+            <button onclick="deleteSubject(${sub.id})" class="text-red-600 font-semibold">Delete</button>
+          </div>
+        `;
+                subjectList.appendChild(li);
+
+                const option = document.createElement('option');
+                option.value = sub.id;
+                option.textContent = sub.name;
+                flashcardSubject.appendChild(option);
+                chapterSubject.appendChild(option.cloneNode(true));
+                notesSubject.appendChild(option.cloneNode(true));
+            });
+        }
+
+        subjectForm.onsubmit = async(e) => {
+            e.preventDefault();
+            const name = subjectInput.value.trim();
+            if (!name) return;
+            await fetch('http://localhost:5000/api/admin/subjects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name
+                })
+            });
+            subjectInput.value = '';
+            loadSubjects();
+        };
+
+        async function deleteSubject(id) {
+            if (confirm('Are you sure you want to delete this subject?')) {
+                await fetch(`http://localhost:5000/api/admin/subjects/${id}`, {
+                    method: 'DELETE'
+                });
+                loadSubjects();
+            }
+        }
+
+        async function editSubject(id, currentName) {
+            const newName = prompt('Edit subject name:', currentName);
+            if (newName && newName !== currentName) {
+                await fetch(`http://localhost:5000/api/admin/subjects/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: newName.trim()
+                    })
+                });
+                loadSubjects();
+            }
+        }
+
+        flashcardSubject.onchange = async() => {
+            const selected = flashcardSubject.value;
+            flashcardChapter.innerHTML = '<option value="">Select Chapter</option>';
+            flashcardList.innerHTML = '';
+            if (selected) {
+                // Load chapters for this subject
+                const res = await fetch(`http://localhost:5000/api/admin/chapters/${selected}`);
+                const chapters = await res.json();
+                chapters.forEach(chap => {
+                    const option = document.createElement('option');
+                    option.value = chap.id;
+                    option.textContent = `Chapter ${chap.chapter_number}: ${chap.title}`;
+                    flashcardChapter.appendChild(option);
+                });
+            }
+        };
+        flashcardChapter.onchange = () => {
+            const chapterId = flashcardChapter.value;
+            if (chapterId) loadFlashcardsByChapter(chapterId);
+            else flashcardList.innerHTML = '';
+        };
+        async function loadFlashcardsByChapter(chapterId) {
+            flashcardList.innerHTML = '';
+            const res = await fetch(`http://localhost:5000/api/admin/flashcards/chapter/${chapterId}`);
+            const cards = await res.json();
+            cards.forEach(card => {
+                const li = document.createElement('li');
+                li.className = 'bg-yellow-100 px-4 py-2 rounded';
+                li.innerHTML = `
+          <p class="font-semibold">Q: ${card.question}</p>
+          <p class="text-sm text-gray-700">A: ${card.answer}</p>
+          <button onclick="editFlashcard(${card.id}, '${card.question.replace(/'/g, "&#39;")}', '${card.answer.replace(/'/g, "&#39;")}' )" class="text-blue-600 mr-3">Edit</button>
+          <button onclick="deleteFlashcard(${card.id})" class="text-red-600">Delete</button>
+        `;
+                flashcardList.appendChild(li);
+            });
+        }
+        addFlashcardForm.onsubmit = async(e) => {
+            e.preventDefault();
+            const subjectId = flashcardSubject.value;
+            const chapterId = flashcardChapter.value;
+            const question = questionInput.value.trim();
+            const answer = answerInput.value.trim();
+            if (!subjectId || !chapterId || !question || !answer) return;
+            await fetch('http://localhost:5000/api/admin/flashcards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subjectId,
+                    chapterId,
+                    question,
+                    answer
+                })
+            });
+            questionInput.value = '';
+            answerInput.value = '';
+            loadFlashcardsByChapter(chapterId);
+        };
+
+        async function deleteFlashcard(id) {
+            await fetch(`http://localhost:5000/api/admin/flashcards/${id}`, {
+                method: 'DELETE'
+            });
+            const selected = flashcardSubject.value;
+            loadFlashcards(selected);
+        }
+
+        async function editFlashcard(id, currentQ, currentA) {
+            const newQ = prompt('Edit question:', currentQ);
+            const newA = prompt('Edit answer:', currentA);
+            if (newQ && newA) {
+                await fetch(`http://localhost:5000/api/admin/flashcards/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: newQ.trim(),
+                        answer: newA.trim()
+                    })
+                });
+                const selected = flashcardSubject.value;
+                loadFlashcards(selected);
+            }
+        }
+
+        async function loadSubjectsForChapters() {
+            const res = await fetch('http://localhost:5000/api/admin/subjects');
+            const subjects = await res.json();
+            chapterSubject.innerHTML = '<option value="">Select Subject</option>';
+            subjects.forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub.id;
+                option.textContent = sub.name;
+                chapterSubject.appendChild(option);
+            });
+        }
+
+        chapterSubject.onchange = () => {
+            const subjectId = chapterSubject.value;
+            if (subjectId) loadChapters(subjectId);
+            else chapterList.innerHTML = '';
+        };
+
+        async function loadChapters(subjectId) {
+            chapterList.innerHTML = '';
+            const res = await fetch(`http://localhost:5000/api/admin/chapters/${subjectId}`);
+            const chapters = await res.json();
+            chapters.forEach(chap => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-gray-200 px-4 py-2 rounded';
+                li.innerHTML = `
+            <span class="font-medium">Chapter ${chap.chapter_number}: ${chap.title}</span>
+            <div>
+                <button onclick="editChapter(${chap.id}, ${chap.chapter_number}, '${chap.title.replace(/'/g, "&#39;")}', ${subjectId})" class="text-blue-600 font-semibold mr-3">Edit</button>
+                <button onclick="deleteChapter(${chap.id}, ${subjectId})" class="text-red-600 font-semibold">Delete</button>
+            </div>
+        `;
+                chapterList.appendChild(li);
+            });
+        }
+
+        addChapterForm.onsubmit = async(e) => {
+            e.preventDefault();
+            const subjectId = chapterSubject.value;
+            const chapter_number = chapterNumberInput.value;
+            const title = chapterTitleInput.value.trim();
+            if (!subjectId || !chapter_number || !title) return;
+            await fetch('http://localhost:5000/api/admin/chapters', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subjectId,
+                    chapter_number,
+                    title
+                })
+            });
+            chapterNumberInput.value = '';
+            chapterTitleInput.value = '';
+            loadChapters(subjectId);
+            loadSubjects(); // refresh dropdowns elsewhere
+        };
+
+        async function deleteChapter(id, subjectId) {
+            if (confirm('Are you sure you want to delete this chapter?')) {
+                await fetch(`http://localhost:5000/api/admin/chapters/${id}`, {
+                    method: 'DELETE'
+                });
+                loadChapters(subjectId);
+                loadSubjects();
+            }
+        }
+
+        async function editChapter(id, currentNumber, currentTitle, subjectId) {
+            const newNumber = prompt('Edit chapter number:', currentNumber);
+            const newTitle = prompt('Edit chapter title:', currentTitle);
+            if (newNumber && newTitle) {
+                await fetch(`http://localhost:5000/api/admin/chapters/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chapter_number: newNumber,
+                        title: newTitle.trim()
+                    })
+                });
+                loadChapters(subjectId);
+                loadSubjects();
+            }
+        }
+
+        // Populate chapters when subject changes for notes upload
+        notesSubject.onchange = async() => {
+            const subjectId = notesSubject.value;
+            notesChapter.innerHTML = '<option value="">Select Chapter</option>';
+            if (subjectId) {
+                const res = await fetch(`http://localhost:5000/api/admin/chapters/${subjectId}`);
+                const chapters = await res.json();
+                chapters.forEach(chap => {
+                    const option = document.createElement('option');
+                    option.value = chap.id;
+                    option.textContent = `Chapter ${chap.chapter_number}: ${chap.title}`;
+                    notesChapter.appendChild(option);
+                });
+            }
+        };
+
+        // Handle PDF upload
+        uploadNotesForm.onsubmit = async(e) => {
+            e.preventDefault();
+            notesUploadMsg.textContent = '';
+            const subjectId = notesSubject.value;
+            const chapterId = notesChapter.value;
+            const file = notesPdf.files[0];
+            if (!subjectId || !chapterId || !file) {
+                notesUploadMsg.textContent = 'Please select subject, chapter, and PDF.';
+                return;
+            }
+            const formData = new FormData();
+            formData.append('subjectId', subjectId);
+            formData.append('chapterId', chapterId);
+            formData.append('pdf', file);
+            try {
+                const res = await fetch('http://localhost:5000/api/admin/upload-notes', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res.ok) {
+                    notesUploadMsg.textContent = 'PDF uploaded successfully!';
+                    notesUploadMsg.className = 'text-green-600 mt-2';
+                } else {
+                    notesUploadMsg.textContent = 'Failed to upload PDF.';
+                    notesUploadMsg.className = 'text-red-600 mt-2';
+                }
+            } catch (err) {
+                notesUploadMsg.textContent = 'Error uploading PDF.';
+                notesUploadMsg.className = 'text-red-600 mt-2';
+            }
+            notesPdf.value = '';
+        };
+
+        loadSubjects();
+        loadSubjectsForChapters();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Quiz | Flashcard Revision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        .confetti {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .confetti-piece {
+            position: absolute;
+            will-change: transform;
+            font-size: 2rem;
+            opacity: 0.85;
+            animation: confetti-fall 2.5s cubic-bezier(.2, 1.2, .4, 1) forwards;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(90vh) rotate(360deg);
+            }
+        }
+        
+        .quiz-animate-in {
+            animation: fade-in-up 0.7s cubic-bezier(.25, 1.7, .45, .87);
+        }
+        
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .progress-bar {
+            transition: width 0.7s cubic-bezier(.4, 1.4, .6, 1);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+    <header class="bg-gradient-to-r from-purple-600 via-blue-500 to-sky-400 text-white py-6 shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between px-6">
+            <h1 class="text-3xl font-extrabold tracking-tight mb-2 md:mb-0 animate-fade-in-up">🎯 Daily Quiz</h1>
+            <a href="dashboard.html" class="bg-white text-purple-700 font-bold px-5 py-2 rounded-lg shadow hover:bg-purple-100 transition-all">← Back to Dashboard</a>
+        </div>
+    </header>
+    <main class="flex-1 flex flex-col items-center justify-center py-10 px-2">
+        <div class="w-full max-w-xl bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center relative overflow-hidden quiz-animate-in">
+            <div class="w-full flex flex-col items-center mb-6">
+                <div class="text-4xl font-extrabold text-purple-700 mb-2 animate-bounce">🚀</div>
+                <div class="text-2xl font-bold text-gray-800 mb-1">Test Your Knowledge!</div>
+                <div class="text-md text-gray-500 mb-2 text-center">Answer today's 5 MCQs and see how you do. Come back every day for new questions!</div>
+            </div>
+            <div id="quizProgress" class="w-full mb-6">
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div id="progressBar" class="h-4 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 progress-bar" style="width:0%"></div>
+                </div>
+                <div class="text-right text-xs text-gray-500 mt-1" id="progressText">0/5</div>
+            </div>
+            <div id="quizContainer" class="w-full"></div>
+            <div id="quizFeedback" class="text-lg font-semibold mt-4 min-h-[32px] text-center"></div>
+        </div>
+    </main>
+    <script>
+        // --- Confetti Effect ---
+        function launchConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            const emojis = ['🎉', '✨', '🎊', '🪅', '💥', '🌈', '⭐', '🥳'];
+            for (let i = 0; i < 60; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.top = '-5vh';
+                piece.style.fontSize = (Math.random() * 1.5 + 1.2) + 'rem';
+                piece.style.animationDelay = (Math.random() * 0.7) + 's';
+                confetti.appendChild(piece);
+            }
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+
+        // --- Demo MCQs (replace with fetch in real app) ---
+        const mcqs = [{
+            question: "What does SQL stand for?",
+            option_a: "Structured Query Language",
+            option_b: "Simple Query Language",
+            option_c: "Sequential Query Language",
+            option_d: "Standard Query Language",
+            correct_option: "A",
+            explanation: "SQL stands for Structured Query Language."
+        }, {
+            question: "Which of these is not a Java keyword?",
+            option_a: "static",
+            option_b: "Boolean",
+            option_c: "void",
+            option_d: "private",
+            correct_option: "B",
+            explanation: "Boolean is not a Java keyword."
+        }, {
+            question: "Which color model is used in digital image processing?",
+            option_a: "RGB",
+            option_b: "CMYK",
+            option_c: "HSV",
+            option_d: "All of the above",
+            correct_option: "D",
+            explanation: "All are used."
+        }, {
+            question: "Which is a measure of central tendency?",
+            option_a: "Mean",
+            option_b: "Variance",
+            option_c: "Standard Deviation",
+            option_d: "Range",
+            correct_option: "A",
+            explanation: "Mean is a measure of central tendency."
+        }, {
+            question: "What is the probability of getting a head in a fair coin toss?",
+            option_a: "0.25",
+            option_b: "0.5",
+            option_c: "0.75",
+            option_d: "1",
+            correct_option: "B",
+            explanation: "Probability is 0.5."
+        }];
+        let current = 0,
+            score = 0;
+        const quizContainer = document.getElementById('quizContainer');
+        const quizFeedback = document.getElementById('quizFeedback');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        // --- Quiz lockout logic ---
+        const todayKey = 'dailyQuizCompleted_' + new Date().toISOString().slice(0, 10);
+        if (localStorage.getItem(todayKey)) {
+            quizContainer.innerHTML = `<div class="text-green-700 font-bold text-2xl animate-bounce">🎉 You have already completed today's quiz!<br>Score: ${localStorage.getItem(todayKey)} / ${mcqs.length}</div><div class='flex justify-center mt-6'><a href='dashboard.html' class='bg-purple-500 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded shadow transition-all'>Back to Dashboard</a></div>`;
+            progressBar.style.width = '100%';
+            progressText.textContent = `${mcqs.length}/${mcqs.length}`;
+        } else {
+            renderMCQ(current);
+        }
+
+        function renderMCQ(idx) {
+            if (idx >= mcqs.length) {
+                localStorage.setItem(todayKey, score);
+                quizContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center min-h-[180px]">
+                        <div class="text-green-700 font-bold text-2xl animate-bounce mb-2">🎉 You finished today's quiz!</div>
+                        <div class="flex items-center justify-center w-full">
+                            <div class="text-green-700 font-bold text-xl mb-2">Score: ${score}/${mcqs.length}</div>
+                        </div>
+                        <div class='flex justify-center mt-6'>
+                            <a href='dashboard.html' class='bg-purple-500 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded shadow transition-all'>Back to Dashboard</a>
+                        </div>
+                    </div>
+                `;
+                quizFeedback.textContent = '';
+                launchConfetti();
+                progressBar.style.width = '100%';
+                progressText.textContent = `${mcqs.length}/${mcqs.length}`;
+                return;
+            }
+            const q = mcqs[idx];
+            progressBar.style.width = `${Math.round((idx/mcqs.length)*100)}%`;
+            progressText.textContent = `${idx}/${mcqs.length}`;
+            quizContainer.innerHTML = `
+                <div class="mb-4 text-xl font-semibold text-gray-800 animate-fade-in-up">Q${idx+1}. ${q.question}</div>
+                <div class="flex flex-col gap-3 mb-2">
+                    <label class="bg-blue-50 rounded px-3 py-2 cursor-pointer hover:bg-blue-100 transition-all">
+                        <input type="radio" name="mcqOption" value="A" class="mr-2">A. ${q.option_a}
+                    </label>
+                    <label class="bg-blue-50 rounded px-3 py-2 cursor-pointer hover:bg-blue-100 transition-all">
+                        <input type="radio" name="mcqOption" value="B" class="mr-2">B. ${q.option_b}
+                    </label>
+                    <label class="bg-blue-50 rounded px-3 py-2 cursor-pointer hover:bg-blue-100 transition-all">
+                        <input type="radio" name="mcqOption" value="C" class="mr-2">C. ${q.option_c}
+                    </label>
+                    <label class="bg-blue-50 rounded px-3 py-2 cursor-pointer hover:bg-blue-100 transition-all">
+                        <input type="radio" name="mcqOption" value="D" class="mr-2">D. ${q.option_d}
+                    </label>
+                </div>
+                <div class='flex justify-center'>
+                    <button id="submitMCQBtn" class="bg-purple-500 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded shadow transition-all mt-2">Submit</button>
+                </div>
+            `;
+            quizFeedback.textContent = '';
+            document.getElementById('submitMCQBtn').onclick = function() {
+                const selected = document.querySelector('input[name="mcqOption"]:checked');
+                if (!selected) {
+                    quizFeedback.textContent = 'Please select an option.';
+                    quizFeedback.className = 'text-lg font-semibold mt-4 text-yellow-600';
+                    return;
+                }
+                if (selected.value === q.correct_option) {
+                    quizFeedback.textContent = 'Correct! 🎉 ' + (q.explanation ? q.explanation : '');
+                    quizFeedback.className = 'text-lg font-semibold mt-4 text-green-600 animate-fade-in-up';
+                    score++;
+                    launchConfetti();
+                    setTimeout(() => {
+                        current++;
+                        renderMCQ(current);
+                    }, 1400);
+                } else {
+                    quizFeedback.textContent = 'Incorrect. ' + (q.explanation ? q.explanation : 'Try again!');
+                    quizFeedback.className = 'text-lg font-semibold mt-4 text-red-600 animate-fade-in-up';
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>
